@@ -1,0 +1,74 @@
+-- 学生表
+CREATE TABLE students (
+    id     VARCHAR(20)  NOT NULL,
+    name   VARCHAR(20)  NOT NULL,
+    birth  DATE         NOT NULL,
+    gender VARCHAR(20)  NOT NULL,
+    PRIMARY KEY(id)
+);
+
+-- 教师表
+CREATE TABLE teachers (
+    id   VARCHAR(20)  NOT NULL,
+    name VARCHAR(20)  NOT NULL,
+    PRIMARY KEY(id)
+);
+
+-- 课程表
+CREATE TABLE courses (
+    id         VARCHAR(20) NOT NULL,
+    name       VARCHAR(20) NOT NULL,
+    teacher_id VARCHAR(20) NOT NULL,
+    FOREIGN KEY(teacher_id) REFERENCES teachers(id),
+    PRIMARY KEY(id)
+);
+
+-- 成绩表
+CREATE TABLE scores (
+    student_id VARCHAR(20) NOT NULL,
+    course_id  VARCHAR(20) NOT NULL,
+    score      FLOAT(3)    NOT NULL,
+    FOREIGN KEY(student_id) REFERENCES students(id),
+    FOREIGN KEY(course_id)  REFERENCES courses(id)
+);
+
+-- 学生数据
+insert into students values('01', '赵雷', '1990-01-01', '男');
+insert into students values('02', '钱电', '1990-12-21', '男');
+insert into students values('03', '孙风', '1990-05-20', '男');
+insert into students values('04', '李云', '1990-08-06', '男');
+insert into students values('05', '周梅', '1991-12-01', '女');
+insert into students values('06', '吴兰', '1992-03-01', '女');
+insert into students values('07', '郑竹', '1989-07-01', '女');
+insert into students values('08', '王菊', '1990-01-20', '女');
+
+-- 教师数据
+insert into teachers values('01', '张三');
+insert into teachers values('02', '李四');
+insert into teachers values('03', '王五');
+
+-- 课程数据
+insert into courses values('01', '语文', '02');
+insert into courses values('02', '数学', '01');
+insert into courses values('03', '英语', '03');
+
+-- 成绩数据
+insert into scores values('01', '01', 80);
+insert into scores values('01', '02', 90);
+insert into scores values('01', '03', 99);
+insert into scores values('02', '01', 70);
+insert into scores values('02', '02', 60);
+insert into scores values('02', '03', 80);
+insert into scores values('03', '01', 80);
+insert into scores values('03', '02', 80);
+insert into scores values('03', '03', 80);
+insert into scores values('04', '01', 50);
+insert into scores values('04', '02', 30);
+insert into scores values('04', '03', 20);
+insert into scores values('05', '01', 76);
+insert into scores values('05', '02', 87);
+insert into scores values('06', '01', 31);
+insert into scores values('06', '03', 34);
+insert into scores values('07', '02', 89);
+insert into scores values('07', '03', 98);
+
