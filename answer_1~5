@@ -59,6 +59,11 @@ from students st left join
 	from scores sc
 	group by sc.student_id) sc on st.id = sc.student_id;
 
+-- 4.1 查有成绩的学生信息
+select *
+from students st
+where exists (select 1 from scores sc where st.id = sc.student_id);
+
 -- 5. 查询"李"姓老师的数量
 select count(*)
 from teachers
