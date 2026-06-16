@@ -1,0 +1,65 @@
+-- 1. 查询 "01" 课程比 "02" 课程成绩高的学生的信息及课程分数
+
+select s1.*, s2.score c01, s3.score c02
+from students s1, scores s2, scores s3
+where s1.id = s2.student_id and s1.id = s3.student_id
+and s2.course_id = '01' and s3.course_id = '02'
+and s2.score > s3.score;
+
+select s3.*, s1.score c01, s2.score c02
+from (select * from scores s where s.course_id = '01') as s1, (select * from scores s where s.course_id = '02') as s2, students s3
+where s3.id = s2.student_id and s3.id = s1.student_id
+and s1.score > s2.score;
+
+-- 行专列
+select s1.*, s2.s01, s2.s02
+from students s1, 
+	(select 
+		s.student_id,
+		max(case when s.course_id = '01' then s.score end) s01,
+		max(case when s.course_id = '02' then s.score end) s02
+	from scores s
+	group by s.student_id) s2
+where s1.id = s2.student_id and s2.s01 > s2.s02;
+
+-- 2. 查询平均成绩大于等于 60 分的同学的学生编号和学生姓名和平均成绩
+
+select s.id, s.name, s1.avg_s
+from students s, 
+	(select s1.student_id, round(avg(s1.score), 1) avg_s
+	from scores s1
+	group by s1.student_id
+	having avg(s1.score) >= 60) s1
+where s.id = s1.student_id;
+
+select s.id, s.name, s1.avg_s
+from students s, 
+	(select s1.student_id, round(avg(s1.score), 1) avg_s
+	from scores s1
+	group by s1.student_id) s1
+where s.id = s1.student_id and s1.avg_s >= 60;
+
+-- 3. 查询在 scores 表存在成绩的学生信息
+
+select s.*
+from students s, 
+	(select distinct student_id
+	from scores) s1
+where s.id = s1.student_id;
+
+select *
+from students s
+where s.id in (select distinct student_id from scores);
+
+-- 4. 查询所有同学的学生编号、学生姓名、选课总数、所有课程的总成绩(没成绩的显示为 null)
+
+select st.id, st.name, sc.sum_course, sc.sum_score
+from students st left join
+	(select sc.student_id, sum(sc.course_id) sum_course, sum(sc.score) sum_score
+	from scores sc
+	group by sc.student_id) sc on st.id = sc.student_id;
+
+-- 5. 查询"李"姓老师的数量
+select count(*)
+from teachers
+where name like '李%';
