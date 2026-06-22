@@ -1,0 +1,72 @@
+-- 6. 查询学过"张三"老师授课的同学的信息
+
+select st.*
+from students st, teachers t, courses c, scores sc
+where t.name = '张三' and t.id = c.teacher_id and c.id = sc.course_id and st.id = sc.student_id;
+
+-- 7. 查询没有学全所有课程的同学的信息
+
+select st.*
+from students st
+where st.id not in (
+	select sc.student_id 
+    from scores sc 
+    group by sc.student_id 
+    having count(sc.course_id) = (select count(*) from courses)
+);
+    
+
+-- 8. 查询至少有一门课与学号为 "01" 的同学所学相同的同学的信息
+
+select st.*
+from students st
+where id in 
+	(select distinct sc.student_id
+	from scores sc
+	where sc.student_id != '01' and sc.course_id in 
+		(select sc.course_id
+		from scores sc
+		where sc.student_id = '01'));
+        
+select distinct st.*
+from students st, scores sc
+where st.id = sc.student_id and sc.course_id in (
+	select distinct course_id 
+    from scores
+    where student_id = '01'
+) and st.id != '01' ;
+
+-- 9. 查询和 "01" 号的同学学习的课程完全相同的其他同学的信息
+
+select st.*
+from scores sc, students st
+where sc.student_id != '01' and sc.student_id = st.id
+group by sc.student_id
+having 
+-- 统计与 '01' 号同学学的课程数一样
+	count(sc.course_id) = (select count(course_id) from scores where student_id = '01') 
+and 
+-- 统计学过的属于 '01' 同学的课程的数量
+	sum(case when sc.course_id in (select course_id from scores where student_id = '01') then 1 else 0 end) 
+		= (select count(course_id) from scores where student_id = '01');
+
+
+-- 10. 查询没学过"张三"老师讲授的任一门课程的学生姓名
+
+select st.name
+from students st
+where st.id not in
+	(select sc.student_id
+	from scores sc
+	where sc.course_id in 
+		(select c.id
+		from courses c, teachers t
+		where t.name = '张三' and c.teacher_id = t.id));
+        
+select st.name
+from students st
+where st.id not in
+	(select sc.student_id
+	from scores sc
+	where exists (select 1 from courses c, teachers t where t.name = '张三' and c.teacher_id = t.id and sc.course_id = c.id)
+);
