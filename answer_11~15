@@ -1,0 +1,58 @@
+-- 11. 查询两门及其以上不及格课程的同学的学号，姓名及其平均成绩
+
+select sc.student_id, s.name, round(avg(sc.score), 2) avg_score
+from scores sc join students s on sc.student_id = s.id
+group by sc.student_id
+having sum(case when sc.score < 60 then 1 else 0 end) >= 2;
+
+select sc.student_id, s.name, round(avg(sc.score), 2) avg_score
+from scores sc join students s on sc.student_id = s.id
+where sc.score < 60
+group by sc.student_id
+having count(*) >= 2;
+
+
+-- 12. 检索 "01" 课程分数小于 60，按分数降序排列的学生信息
+
+select st.*, sc.score
+from scores sc join students st on st.id = sc.student_id
+where sc.course_id = '01' and sc.score < 60
+order by sc.score desc;
+
+
+-- 13. 按平均成绩从高到低显示所有学生的所有课程的成绩以及平均成绩
+select 
+	sc.student_id, sc.course_id, sc.score, round(t1.avg_score, 2)
+from scores sc left join (
+	select student_id, avg(score) avg_score 
+    from scores 
+	group by student_id) as t1 
+on sc.student_id =t1.student_id 
+order by t1.avg_score desc;
+
+-- 下例不是很严谨，写死了课程
+select 
+	sc.student_id, 
+    ifnull(max(case when sc.course_id = '01' then sc.score end)) c01,
+    max(case when sc.course_id = '02' then sc.score end) c02,
+    max(case when sc.course_id = '03' then sc.score end) c03,
+    round(avg(sc.score), 2) avg_score
+from scores sc
+group by sc.student_id
+order by avg_score desc;
+    
+-- 14. 查询各科成绩最高分、最低分和平均分：以如下形式显示：课程 ID，课程 name，最高分，最低分，平均分，及格率，中等率，优良率，优秀率；（及格为>=60，中等为：70-80，优良为：80-90，优秀为：>=90）
+
+select 
+	c.id '课程 ID', c.name '课程 name',
+	round(max(sc.score), 2) '最高分', 
+	round(min(sc.score), 2) '最低分', 
+	round(avg(sc.score), 2) '平均分',
+	concat(round(100 * (sum(case when sc.score >= 60 then 1 else 0 end) / count(sc.course_id)), 2), '%') '及格率',
+	concat(round(100 * (sum(case when sc.score < 80 and sc.score >= 70 then 1 else 0 end) / count(sc.course_id)), 2), '%') '中等率',
+	concat(round(100 * (sum(case when sc.score < 90 and sc.score >= 80 then 1 else 0 end) / count(sc.course_id)), 2), '%') '优良率',
+	concat(round(100 * (sum(case when sc.score >= 90 then 1 else 0 end) / count(sc.course_id)), 2), '%') '优秀率'
+from courses c right join scores sc on c.id = sc.course_id
+group by sc.course_id;
+
+-- 15. 按各科成绩进行排序，并显示排名， score 重复时保留名次空缺
